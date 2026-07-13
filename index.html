@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMS School & College — Grade Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#132540;
+    --navy-deep:#0b1a2e;
+    --maroon:#7a1f2b;
+    --gold:#c9a227;
+    --gold-soft:#e6cd7d;
+    --ivory:#f7f3e9;
+    --ivory-dim:#efe9d8;
+    --ink:#20242c;
+    --line:#d8cfb8;
+    --success:#2d7d46;
+    --fail:#912028;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:'Source Sans 3',sans-serif;
+    min-height:100vh;
+  }
+
+  /* ===== Header / masthead ===== */
+  .masthead{
+    background:linear-gradient(180deg,var(--navy) 0%,var(--navy-deep) 100%);
+    color:var(--ivory);
+    padding:28px 20px 22px;
+    border-bottom:6px solid var(--gold);
+    position:relative;
+  }
+  .masthead-inner{
+    max-width:900px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    gap:20px;
+  }
+  .seal{
+    flex:0 0 auto;
+    width:76px;height:76px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff4d6, var(--gold) 55%, #a9821f 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;
+    font-weight:900;
+    font-size:22px;
+    color:var(--navy-deep);
+    border:3px solid var(--ivory);
+    box-shadow:0 0 0 2px var(--gold), 0 6px 14px rgba(0,0,0,.35);
+    letter-spacing:.5px;
+  }
+  .masthead-text h1{
+    margin:0;
+    font-family:'Playfair Display',serif;
+    font-weight:700;
+    font-size:clamp(22px,4vw,32px);
+    letter-spacing:.3px;
+  }
+  .masthead-text p{
+    margin:4px 0 0;
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+  }
+  .masthead-text span.affil{
+    display:block;
+    margin-top:6px;
+    font-size:12.5px;
+    color:#c9d2e0;
+    letter-spacing:.3px;
+    text-transform:none;
+  }
+
+  /* ===== Main layout ===== */
+  main{
+    max-width:900px;
+    margin:0 auto;
+    padding:34px 20px 60px;
+  }
+  .card{
+    background:#fffdf8;
+    border:1px solid var(--line);
+    border-radius:4px;
+    box-shadow:0 1px 0 var(--line), 0 8px 24px rgba(19,37,64,.06);
+  }
+  .form-card{padding:26px 24px 24px;margin-bottom:28px;}
+  .form-card h2{
+    font-family:'Playfair Display',serif;
+    margin:0 0 4px;
+    font-size:20px;
+    color:var(--navy);
+  }
+  .form-card .sub{
+    margin:0 0 20px;
+    font-size:13px;
+    color:#6b6455;
+  }
+  .field{margin-bottom:16px;}
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+    color:var(--navy);
+    margin-bottom:6px;
+  }
+  input[type="text"], input[type="number"], select{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-size:15px;
+    font-family:'Source Sans 3',sans-serif;
+    background:#fff;
+    color:var(--ink);
+  }
+  select{
+    appearance:auto;
+    cursor:pointer;
+  }
+  input:focus, select:focus{
+    outline:2px solid var(--gold);
+    outline-offset:1px;
+    border-color:var(--gold);
+  }
+  .row{display:flex;gap:14px;flex-wrap:wrap;}
+  .row .field{flex:1 1 220px;}
+
+  .search-row{display:flex;gap:12px;align-items:stretch;}
+  .search-row input[type="text"]{flex:1;min-width:0;}
+  .search-row .btn{white-space:nowrap;padding-top:0;padding-bottom:0;display:flex;align-items:center;}
+
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    background:var(--maroon);
+    color:#fff;
+    font-weight:600;
+    font-size:14.5px;
+    letter-spacing:.3px;
+    padding:12px 22px;
+    border-radius:3px;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .btn:hover{background:#631723;}
+  .btn:active{transform:translateY(1px);}
+  .btn.secondary{
+    background:transparent;
+    color:var(--navy);
+    border:1px solid var(--navy);
+  }
+  .btn.secondary:hover{background:rgba(19,37,64,.06);}
+  .actions{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;}
+
+  #gradeResult{
+    margin-top:18px;
+    padding:14px 16px;
+    border-left:4px solid var(--gold);
+    background:var(--ivory-dim);
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink);
+    display:none;
+    border-radius:0 3px 3px 0;
+  }
+  #gradeResult.show{display:block;}
+  #gradeResult.pass{border-left-color:var(--success);}
+  #gradeResult.fail{border-left-color:var(--fail);}
+
+  /* ===== Result card table ===== */
+  .result-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+    font-size:14px;
+  }
+  .result-table th{
+    background:var(--navy);
+    color:var(--ivory);
+    padding:10px 12px;
+    text-align:left;
+    font-size:12px;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+  }
+  .result-table td{
+    padding:10px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  .result-table tr:last-child td{border-bottom:none;}
+  .result-table .subject{font-weight:600;}
+  .result-table .obtained{font-family:'JetBrains Mono',monospace;font-weight:600;}
+  .result-table .total{font-family:'JetBrains Mono',monospace;color:#6b6455;}
+  .result-table .grade-badge{
+    display:inline-block;
+    padding:2px 10px;
+    border-radius:2px;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.3px;
+  }
+  .grade-A1{background:#d4edda;color:#155724;}
+  .grade-A{background:#d4edda;color:#155724;}
+  .grade-B{background:#fff3cd;color:#856404;}
+  .grade-C{background:#fff3cd;color:#856404;}
+  .grade-D{background:#ffeeba;color:#856404;}
+  .grade-F{background:#f8d7da;color:#721c24;}
+
+  /* ===== Summary bar ===== */
+  .summary-wrap{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-top:16px;
+    padding:14px 16px;
+    background:var(--ivory);
+    border:1px solid var(--line);
+    border-radius:3px;
+  }
+  .summary-item{
+    flex:1 1 120px;
+    text-align:center;
+  }
+  .summary-item .label{
+    display:block;
+    font-size:10.5px;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+    color:#6b6455;
+    margin-bottom:2px;
+  }
+  .summary-item .value{
+    font-family:'JetBrains Mono',monospace;
+    font-size:22px;
+    font-weight:700;
+    color:var(--navy);
+  }
+  .summary-item .value.pass{color:var(--success);}
+  .summary-item .value.fail{color:var(--fail);}
+
+  /* ===== Student info header in result ===== */
+  .student-info{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:16px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .student-avatar{
+    width:48px;height:48px;border-radius:50%;
+    background:var(--navy);
+    color:var(--ivory);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+    font-size:20px;
+    font-family:'Playfair Display',serif;
+    flex-shrink:0;
+  }
+  .student-details h3{
+    margin:0 0 2px;
+    font-size:18px;
+    font-family:'Playfair Display',serif;
+    color:var(--navy);
+  }
+  .student-details p{
+    margin:0;
+    font-size:13px;
+    color:#6b6455;
+  }
+
+  /* ===== Loading ===== */
+  .spinner{
+    display:inline-block;
+    width:18px;height:18px;
+    border:2px solid var(--ivory);
+    border-top-color:transparent;
+    border-radius:50%;
+    animation:spin .6s linear infinite;
+    vertical-align:middle;
+    margin-right:8px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ===== Footer ===== */
+  footer{
+    text-align:center;
+    padding:20px;
+    font-size:12px;
+    color:#8a8270;
+    border-top:1px solid var(--line);
+    max-width:900px;
+    margin:0 auto;
+  }
+
+  /* ===== Animation ===== */
+  @keyframes fadeSlideIn{
+    from{opacity:0;transform:translateY(-8px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  #gradeResult.show{
+    animation:fadeSlideIn .35s ease-out;
+  }
+
+  /* ===== Notice board banner ===== */
+  .notice-banner{
+    background:var(--gold);
+    color:var(--navy-deep);
+    text-align:center;
+    padding:10px 20px;
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Masthead ===== -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="seal">SMS</div>
+    <div class="masthead-text">
+      <h1>SMS School & College</h1>
+      <p>Examination Section — Result Portal</p>
+      <span class="affil">Affiliated with Board of Intermediate & Secondary Education</span>
+    </div>
+  </div>
+</header>
+
+<div class="notice-banner">
+  Annual Examination 2026 — Results Announced
+</div>
+
+<!-- ===== Main ===== -->
+<main>
+
+  <!-- Search / Form Card -->
+  <section class="card form-card">
+    <h2>Search Your Result</h2>
+    <p class="sub">Select your name from the list below to view your grade sheet instantly.</p>
+
+    <div class="field">
+      <label for="studentSelect">Select Student Name</label>
+      <div class="search-row">
+        <select id="studentSelect">
+          <option value="">— Select your name —</option>
+        </select>
+        <button class="btn" id="searchBtn">Find Result</button>
+      </div>
+    </div>
+
+    <!-- Result Display -->
+    <div id="gradeResult">
+      <div id="resultContent"></div>
+    </div>
+  </section>
+
+  <!-- Info Card -->
+  <section class="card form-card" style="margin-bottom:0;">
+    <h2>Grading Policy</h2>
+    <p class="sub">Marks distribution and grade thresholds for Annual Examination 2026.</p>
+    <div style="overflow-x:auto;">
+      <table class="result-table" style="margin-top:0;">
+        <thead>
+          <tr>
+            <th>Grade</th>
+            <th>Percentage</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="grade-badge grade-A1">A<sup>+</sup> (A1)</span></td><td>90% & above</td><td>Outstanding</td></tr>
+          <tr><td><span class="grade-badge grade-A">A</span></td><td>80% – 89%</td><td>Excellent</td></tr>
+          <tr><td><span class="grade-badge grade-B">B</span></td><td>70% – 79%</td><td>Very Good</td></tr>
+          <tr><td><span class="grade-badge grade-C">C</span></td><td>60% – 69%</td><td>Good</td></tr>
+          <tr><td><span class="grade-badge grade-D">D</span></td><td>50% – 59%</td><td>Pass</td></tr>
+          <tr><td><span class="grade-badge grade-F">F</span></td><td>Below 50%</td><td>Fail</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  &copy; 2026 SMS School & College. All rights reserved. &bull; Examination Department
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  const studentSelect = document.getElementById('studentSelect');
+  const gradeDiv      = document.getElementById('gradeResult');
+  const resultCont    = document.getElementById('resultContent');
+
+  // ---------- Student roster ----------
+  const students = [
+    { roll: '2026-001', name: 'Ahmed Khan',         cls: 10, section: 'A' },
+    { roll: '2026-002', name: 'Fatima Ali',          cls: 10, section: 'A' },
+    { roll: '2026-003', name: 'Muhammad Usman',      cls: 9,  section: 'B' },
+    { roll: '2026-004', name: 'Sara Bibi',           cls: 11, section: 'A' },
+    { roll: '2026-005', name: 'Ali Raza',            cls: 12, section: 'B' },
+    { roll: '2026-006', name: 'Ayesha Malik',        cls: 10, section: 'B' },
+    { roll: '2026-007', name: 'Hassan Javed',        cls: 9,  section: 'A' },
+    { roll: '2026-008', name: 'Zainab Tariq',        cls: 11, section: 'B' },
+    { roll: '2026-009', name: 'Omar Farooq',         cls: 12, section: 'A' },
+    { roll: '2026-010', name: 'Hira Naeem',          cls: 9,  section: 'A' },
+    { roll: '2026-011', name: 'Bilal Ahmad',         cls: 10, section: 'B' },
+    { roll: '2026-012', name: 'Mahnoor Shah',        cls: 11, section: 'A' },
+    { roll: '2026-013', name: 'Rayan Akhtar',        cls: 12, section: 'B' },
+    { roll: '2026-014', name: 'Sana Mirza',          cls: 9,  section: 'B' },
+    { roll: '2026-015', name: 'Taha Saeed',          cls: 10, section: 'A' },
+    { roll: '2026-016', name: 'Iqra Naz',            cls: 11, section: 'A' },
+    { roll: '2026-017', name: 'Aamir Hussain',       cls: 12, section: 'B' },
+    { roll: '2026-018', name: 'Rabia Khan',          cls: 10, section: 'B' },
+    { roll: '2026-019', name: 'Farhan Ali',          cls: 9,  section: 'A' },
+    { roll: '2026-020', name: 'Noor Fatima',         cls: 11, section: 'B' },
+    { roll: '2026-021', name: 'Shoaib Malik',        cls: 12, section: 'A' },
+    { roll: '2026-022', name: 'Laiba Riaz',          cls: 9,  section: 'A' },
+    { roll: '2026-023', name: 'Zain Abbas',          cls: 10, section: 'B' },
+    { roll: '2026-024', name: 'Eman Haider',         cls: 11, section: 'A' },
+    { roll: '2026-025', name: 'Hamza Sheikh',        cls: 12, section: 'B' },
+  ];
+
+  // ---------- Subject sets by class ----------
+  const subjectsByClass = {
+    9:  ['Urdu', 'English', 'Mathematics', 'Pakistan Studies', 'Science', 'Islamiyat'],
+    10: ['Urdu', 'English', 'Mathematics', 'Pakistan Studies', 'Computer Science', 'Islamiyat'],
+    11: ['Urdu', 'English', 'Mathematics', 'Physics', 'Chemistry', 'Islamiyat'],
+    12: ['Urdu', 'English', 'Mathematics', 'Physics', 'Chemistry', 'Pakistan Studies'],
+  };
+
+  const classLabel = {
+    9:  'Matric — Class 9',
+    10: 'Matric — Class 10',
+    11: 'Intermediate — Class 11',
+    12: 'Intermediate — Class 12',
+  };
+
+  // ---------- Seeded random (deterministic per student) ----------
+  function seededRandom(seed) {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) {
+      h = ((h << 5) - h) + seed.charCodeAt(i);
+      h |= 0;
+    }
+    return function() {
+      h = (h * 16807 + 0) % 2147483647;
+      return (h & 0x7fffffff) / 0x7fffffff;
+    };
+  }
+
+  // ---------- Grade calculation ----------
+  function getGrade(pct) {
+    if (pct >= 90) return { letter: 'A1', remark: 'Outstanding', pass: true };
+    if (pct >= 80) return { letter: 'A',  remark: 'Excellent',   pass: true };
+    if (pct >= 70) return { letter: 'B',  remark: 'Very Good',   pass: true };
+    if (pct >= 60) return { letter: 'C',  remark: 'Good',        pass: true };
+    if (pct >= 50) return { letter: 'D',  remark: 'Pass',        pass: true };
+    return { letter: 'F', remark: 'Fail', pass: false };
+  }
+
+  // ---------- Generate result for a student ----------
+  function generateResult(roll, cls) {
+    const seed = roll + '-' + cls;
+    const rng  = seededRandom(seed);
+
+    const subjects   = subjectsByClass[cls] || subjectsByClass[10];
+    const totalMarks = subjects.length * 100;
+    let obtained = 0;
+
+    const rows = subjects.map(function(sub) {
+      const marks = Math.round(40 + rng() * 60); // 40–100
+      obtained += marks;
+      const pct   = (marks / 100) * 100;
+      const grade = getGrade(pct);
+      return { subject: sub, obtained: marks, total: 100, grade: grade.letter };
+    });
+
+    const overallPct   = (obtained / totalMarks) * 100;
+    const overallGrade = getGrade(overallPct);
+    const passed       = rows.every(function(r) { return r.grade !== 'F'; });
+
+    return { rows: rows, obtained: obtained, totalMarks: totalMarks, overallPct: overallPct, overallGrade: overallGrade, passed: passed };
+  }
+
+  // ---------- Render result ----------
+  function renderResult(data, student) {
+    var gradeCls    = 'grade-' + data.overallGrade.letter;
+    var passFailCls = data.passed ? 'pass' : 'fail';
+    var initials    = student.name.split(' ').map(function(w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+
+    var html = '';
+
+    // Student info header
+    html += '<div class="student-info">';
+    html += '  <div class="student-avatar">' + initials + '</div>';
+    html += '  <div class="student-details">';
+    html += '    <h3>' + student.name + '</h3>';
+    html += '    <p>Roll No: ' + student.roll + ' &middot; ' + classLabel[student.cls] + ' &middot; Section ' + student.section + '</p>';
+    html += '  </div>';
+    html += '</div>';
+
+    // Subject table
+    html += '<table class="result-table">';
+    html += '  <thead><tr><th>Subject</th><th>Obtained</th><th>Total</th><th>Grade</th></tr></thead>';
+    html += '  <tbody>';
+
+    data.rows.forEach(function(r) {
+      html += '<tr>';
+      html += '  <td class="subject">' + r.subject + '</td>';
+      html += '  <td class="obtained">' + r.obtained + '</td>';
+      html += '  <td class="total">' + r.total + '</td>';
+      html += '  <td><span class="grade-badge grade-' + r.grade + '">' + r.grade + '</span></td>';
+      html += '</tr>';
+    });
+
+    html += '  </tbody>';
+    html += '</table>';
+
+    // Summary
+    html += '<div class="summary-wrap">';
+    html += '  <div class="summary-item"><span class="label">Obtained</span><span class="value">' + data.obtained + '</span></div>';
+    html += '  <div class="summary-item"><span class="label">Total</span><span class="value">' + data.totalMarks + '</span></div>';
+    html += '  <div class="summary-item"><span class="label">Percentage</span><span class="value">' + data.overallPct.toFixed(1) + '%</span></div>';
+    html += '  <div class="summary-item"><span class="label">Grade</span><span class="value ' + gradeCls + '">' + data.overallGrade.letter + '</span></div>';
+    html += '  <div class="summary-item"><span class="label">Status</span><span class="value ' + passFailCls + '">' + (data.passed ? 'PASS' : 'FAIL') + '</span></div>';
+    html += '</div>';
+
+    resultCont.innerHTML = html;
+    gradeDiv.className = 'show ' + (data.passed ? 'pass' : 'fail');
+  }
+
+  // ---------- Show error ----------
+  function showError(msg) {
+    resultCont.innerHTML = '<p style="margin:0;">' + msg + '</p>';
+    gradeDiv.className = 'show fail';
+  }
+
+  // ---------- Helper: look up and display result by roll ----------
+  function displayResultByRoll(roll) {
+    if (!roll) {
+      gradeDiv.className = '';
+      resultCont.innerHTML = '';
+      return;
+    }
+
+    // Find student
+    var student = null;
+    for (var i = 0; i < students.length; i++) {
+      if (students[i].roll === roll) {
+        student = students[i];
+        break;
+      }
+    }
+    if (!student) {
+      showError('Student record not found.');
+      return;
+    }
+
+    // Show loading briefly then render
+    gradeDiv.className = 'show';
+    resultCont.innerHTML = '<p style="margin:0;text-align:center;"><span class="spinner"></span> Loading result…</p>';
+
+    setTimeout(function() {
+      try {
+        var data = generateResult(student.roll, student.cls);
+        renderResult(data, student);
+      } catch (err) {
+        showError('An unexpected error occurred. Please try again.');
+      }
+    }, 500);
+  }
+
+  // ---------- Populate student dropdown ----------
+  (function populateSelect() {
+    for (var i = 0; i < students.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = students[i].roll;
+      opt.textContent = students[i].roll + ' — ' + students[i].name + ' (Class ' + students[i].cls + '-' + students[i].section + ')';
+      studentSelect.appendChild(opt);
+    }
+  })();
+
+  // ---------- Event: select change ----------
+  studentSelect.addEventListener('change', function() {
+    displayResultByRoll(this.value);
+  });
+
+  // ---------- Event: search button click ----------
+  document.getElementById('searchBtn').addEventListener('click', function() {
+    displayResultByRoll(studentSelect.value);
+  });
+
+})();
+</script>
+</body>
+</html>
